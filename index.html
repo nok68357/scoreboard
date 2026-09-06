@@ -1,262 +1,158 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Maximize, Minimize, RotateCcw, Settings, Plus, Minus, Type } from 'lucide-react';
-
-export default function App() {
-  const [team1Score, setTeam1Score] = useState(0);
-  const [team2Score, setTeam2Score] = useState(0);
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scoreboard</title>
   
-  const [team1Name, setTeam1Name] = useState('ทีมเหย้า');
-  const [team2Name, setTeam2Name] = useState('ทีมเยือน');
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   
-  const [team1Color, setTeam1Color] = useState('#ef4444'); // Red
-  const [team2Color, setTeam2Color] = useState('#3b82f6'); // Blue
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  <style>
+    body { margin: 0; overflow: hidden; background-color: #030712; }
+    .color-picker-custom::-webkit-color-swatch-wrapper { padding: 0; }
+    .color-picker-custom::-webkit-color-swatch { border: 2px solid rgba(255,255,255,0.2); border-radius: 0.75rem; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
 
-  const appRef = useRef(null);
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
 
-  // Handle Fullscreen toggle
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      if (appRef.current?.requestFullscreen) {
-        appRef.current.requestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-  };
-
-  // Listen for fullscreen changes to update the icon
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  const resetScores = () => {
-    if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตคะแนนทั้งหมด?')) {
-      setTeam1Score(0);
-      setTeam2Score(0);
-    }
-  };
-
-  // Function to adjust color opacity for background
-  const getBackgroundColor = (hexColor, opacity = 0.2) => {
-    // Convert hex to rgb
-    let r = 0, g = 0, b = 0;
-    if (hexColor.length === 7) {
-      r = parseInt(hexColor.substring(1, 3), 16);
-      g = parseInt(hexColor.substring(3, 5), 16);
-      b = parseInt(hexColor.substring(5, 7), 16);
-    }
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  };
-
-  return (
-    <div 
-      ref={appRef}
-      className="relative flex flex-col md:flex-row h-screen w-screen bg-gray-950 font-sans overflow-hidden select-none"
-    >
-      {/* Central Control Panel */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 flex space-x-4 bg-gray-900/80 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-gray-700/50 transition-all hover:bg-gray-900">
-        <button 
-          onClick={resetScores}
-          className="p-2 md:p-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded-xl transition-colors tooltip-trigger flex flex-col items-center"
-          title="รีเซ็ตคะแนน"
-        >
-          <RotateCcw size={24} />
-        </button>
-        <button 
-          onClick={() => setShowSettings(!showSettings)}
-          className={`p-2 md:p-3 rounded-xl transition-colors flex flex-col items-center ${showSettings ? 'text-white bg-gray-700' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`}
-          title="ตั้งค่า"
-        >
-          <Settings size={24} />
-        </button>
-        <button 
-          onClick={toggleFullscreen}
-          className="p-2 md:p-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded-xl transition-colors hidden sm:flex flex-col items-center"
-          title="เต็มจอ"
-        >
-          {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
-        </button>
-      </div>
-
-      {/* Settings Overlay (Slide down) */}
-      {showSettings && (
-        <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-40 bg-gray-900/95 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-gray-700 w-[90%] max-w-md animate-in fade-in slide-in-from-top-4">
-          <h3 className="text-white text-xl font-bold mb-4 text-center">ตั้งค่าสกอร์บอร์ด</h3>
-          
-          <div className="space-y-6">
-            {/* Team 1 Settings */}
-            <div className="bg-gray-800 p-4 rounded-2xl border border-gray-700">
-              <label className="block text-gray-400 text-sm mb-2 font-medium">ทีมฝั่งซ้าย</label>
-              <div className="flex items-center space-x-3">
-                <input 
-                  type="color" 
-                  value={team1Color}
-                  onChange={(e) => setTeam1Color(e.target.value)}
-                  className="w-12 h-12 rounded-xl cursor-pointer bg-transparent border-0 p-0 color-picker-custom"
-                />
-                <input 
-                  type="text" 
-                  value={team1Name}
-                  onChange={(e) => setTeam1Name(e.target.value)}
-                  className="flex-1 bg-gray-900 text-white border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-blue-500 transition-colors"
-                  placeholder="ชื่อทีม"
-                />
-              </div>
-            </div>
-
-            {/* Team 2 Settings */}
-            <div className="bg-gray-800 p-4 rounded-2xl border border-gray-700">
-              <label className="block text-gray-400 text-sm mb-2 font-medium">ทีมฝั่งขวา</label>
-              <div className="flex items-center space-x-3">
-                <input 
-                  type="color" 
-                  value={team2Color}
-                  onChange={(e) => setTeam2Color(e.target.value)}
-                  className="w-12 h-12 rounded-xl cursor-pointer bg-transparent border-0 p-0 color-picker-custom"
-                />
-                <input 
-                  type="text" 
-                  value={team2Name}
-                  onChange={(e) => setTeam2Name(e.target.value)}
-                  className="flex-1 bg-gray-900 text-white border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-blue-500 transition-colors"
-                  placeholder="ชื่อทีม"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <button 
-            onClick={() => setShowSettings(false)}
-            className="mt-6 w-full py-3 bg-white text-gray-900 font-bold rounded-xl hover:bg-gray-200 transition-colors"
-          >
-            ปิดการตั้งค่า
-          </button>
-        </div>
-      )}
-
-      {/* Team 1 Section */}
-      <div 
-        className="flex-1 flex flex-col justify-center items-center relative transition-colors duration-500 border-b-4 md:border-b-0 md:border-r-4 border-gray-950"
-        style={{ 
-          backgroundColor: getBackgroundColor(team1Color, 0.15),
-          boxShadow: `inset 0 0 150px ${getBackgroundColor(team1Color, 0.1)}`
-        }}
-      >
-        {/* Decorative Top Gradient */}
-        <div 
-          className="absolute top-0 left-0 right-0 h-32 opacity-30" 
-          style={{ background: `linear-gradient(to bottom, ${team1Color}, transparent)` }}
-        />
-
-        <div className="z-10 flex flex-col items-center w-full px-4 sm:px-8">
-          <input
-            type="text"
-            value={team1Name}
-            onChange={(e) => setTeam1Name(e.target.value)}
-            className="bg-transparent text-center text-3xl sm:text-5xl md:text-6xl font-black text-white/90 uppercase tracking-wider w-full focus:outline-none focus:bg-black/20 rounded-2xl py-2 transition-all"
-            style={{ textShadow: `0 4px 20px ${getBackgroundColor(team1Color, 0.5)}` }}
-          />
-          
-          <div className="relative group w-full flex justify-center items-center my-4 sm:my-8">
-            <span 
-              className="text-[25vh] sm:text-[30vh] md:text-[35vh] lg:text-[45vh] font-black leading-none tabular-nums text-white"
-              style={{ textShadow: `0 10px 40px ${getBackgroundColor(team1Color, 0.8)}` }}
-            >
-              {team1Score}
-            </span>
-          </div>
-
-          <div className="flex space-x-4 sm:space-x-8 w-full max-w-sm justify-center">
-            <button 
-              onClick={() => setTeam1Score(Math.max(0, team1Score - 1))}
-              className="flex-1 flex justify-center items-center py-6 bg-black/30 hover:bg-black/50 text-white rounded-3xl backdrop-blur-sm transition-all active:scale-95 border border-white/10"
-            >
-              <Minus size={48} />
-            </button>
-            <button 
-              onClick={() => setTeam1Score(team1Score + 1)}
-              className="flex-1 flex justify-center items-center py-6 bg-white/10 hover:bg-white/20 text-white rounded-3xl backdrop-blur-sm transition-all active:scale-95 border border-white/20"
-              style={{ boxShadow: `0 0 30px ${getBackgroundColor(team1Color, 0.3)}` }}
-            >
-              <Plus size={48} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Team 2 Section */}
-      <div 
-        className="flex-1 flex flex-col justify-center items-center relative transition-colors duration-500"
-        style={{ 
-          backgroundColor: getBackgroundColor(team2Color, 0.15),
-          boxShadow: `inset 0 0 150px ${getBackgroundColor(team2Color, 0.1)}`
-        }}
-      >
-        {/* Decorative Top Gradient */}
-        <div 
-          className="absolute top-0 left-0 right-0 h-32 opacity-30" 
-          style={{ background: `linear-gradient(to bottom, ${team2Color}, transparent)` }}
-        />
-
-        <div className="z-10 flex flex-col items-center w-full px-4 sm:px-8">
-          <input
-            type="text"
-            value={team2Name}
-            onChange={(e) => setTeam2Name(e.target.value)}
-            className="bg-transparent text-center text-3xl sm:text-5xl md:text-6xl font-black text-white/90 uppercase tracking-wider w-full focus:outline-none focus:bg-black/20 rounded-2xl py-2 transition-all"
-            style={{ textShadow: `0 4px 20px ${getBackgroundColor(team2Color, 0.5)}` }}
-          />
-          
-          <div className="relative group w-full flex justify-center items-center my-4 sm:my-8">
-            <span 
-              className="text-[25vh] sm:text-[30vh] md:text-[35vh] lg:text-[45vh] font-black leading-none tabular-nums text-white"
-              style={{ textShadow: `0 10px 40px ${getBackgroundColor(team2Color, 0.8)}` }}
-            >
-              {team2Score}
-            </span>
-          </div>
-
-          <div className="flex space-x-4 sm:space-x-8 w-full max-w-sm justify-center">
-             <button 
-              onClick={() => setTeam2Score(Math.max(0, team2Score - 1))}
-              className="flex-1 flex justify-center items-center py-6 bg-black/30 hover:bg-black/50 text-white rounded-3xl backdrop-blur-sm transition-all active:scale-95 border border-white/10"
-            >
-              <Minus size={48} />
-            </button>
-            <button 
-              onClick={() => setTeam2Score(team2Score + 1)}
-              className="flex-1 flex justify-center items-center py-6 bg-white/10 hover:bg-white/20 text-white rounded-3xl backdrop-blur-sm transition-all active:scale-95 border border-white/20"
-              style={{ boxShadow: `0 0 30px ${getBackgroundColor(team2Color, 0.3)}` }}
-            >
-              <Plus size={48} />
-            </button>
-          </div>
-        </div>
-      </div>
+    function App() {
+      const [team1Score, setTeam1Score] = useState(0);
+      const [team2Score, setTeam2Score] = useState(0);
       
-      {/* Global styles for color picker input to make it look nicer */}
-      <style dangerouslySetInnerHTML={{__html: `
-        .color-picker-custom::-webkit-color-swatch-wrapper {
-          padding: 0;
+      const [team1Name, setTeam1Name] = useState('ทีมเหย้า');
+      const [team2Name, setTeam2Name] = useState('ทีมเยือน');
+      
+      const [team1Color, setTeam1Color] = useState('#ef4444');
+      const [team2Color, setTeam2Color] = useState('#3b82f6');
+
+      const [isFullscreen, setIsFullscreen] = useState(false);
+      const [showSettings, setShowSettings] = useState(false);
+
+      const appRef = useRef(null);
+
+      const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+          if (appRef.current?.requestFullscreen) {
+            appRef.current.requestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
         }
-        .color-picker-custom::-webkit-color-swatch {
-          border: 2px solid rgba(255,255,255,0.2);
-          border-radius: 0.75rem;
+      };
+
+      useEffect(() => {
+        const handleFullscreenChange = () => {
+          setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      }, []);
+
+      const resetScores = () => {
+        if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตคะแนนทั้งหมด?')) {
+          setTeam1Score(0);
+          setTeam2Score(0);
         }
-        .color-picker-custom::-moz-color-swatch {
-          border: 2px solid rgba(255,255,255,0.2);
-          border-radius: 0.75rem;
+      };
+
+      const getBackgroundColor = (hexColor, opacity = 0.2) => {
+        let r = 0, g = 0, b = 0;
+        if (hexColor.length === 7) {
+          r = parseInt(hexColor.substring(1, 3), 16);
+          g = parseInt(hexColor.substring(3, 5), 16);
+          b = parseInt(hexColor.substring(5, 7), 16);
         }
-      `}} />
-    </div>
-  );
-}
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      };
+
+      return (
+        <div ref={appRef} className="relative flex flex-col md:flex-row h-screen w-screen font-sans select-none text-white">
+          
+          {/* แผงควบคุมตรงกลาง */}
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 flex space-x-4 bg-gray-900/80 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-gray-700/50">
+            <button onClick={resetScores} className="p-2 md:p-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded-xl transition-colors" title="รีเซ็ตคะแนน">
+              <span className="text-2xl leading-none">↺</span>
+            </button>
+            <button onClick={() => setShowSettings(!showSettings)} className={`p-2 md:p-3 rounded-xl transition-colors ${showSettings ? 'text-white bg-gray-700' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`} title="ตั้งค่า">
+              <span className="text-2xl leading-none">⚙️</span>
+            </button>
+            <button onClick={toggleFullscreen} className="p-2 md:p-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded-xl transition-colors hidden sm:block" title="เต็มจอ">
+              <span className="text-2xl leading-none">{isFullscreen ? '🗗' : '⛶'}</span>
+            </button>
+          </div>
+
+          {/* เมนูตั้งค่า */}
+          {showSettings && (
+            <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-40 bg-gray-900/95 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-gray-700 w-[90%] max-w-md">
+              <h3 className="text-white text-xl font-bold mb-4 text-center">ตั้งค่าสกอร์บอร์ด</h3>
+              <div className="space-y-6">
+                <div className="bg-gray-800 p-4 rounded-2xl border border-gray-700">
+                  <label className="block text-gray-400 text-sm mb-2 font-medium">ทีมฝั่งซ้าย</label>
+                  <div className="flex items-center space-x-3">
+                    <input type="color" value={team1Color} onChange={(e) => setTeam1Color(e.target.value)} className="w-12 h-12 rounded-xl cursor-pointer bg-transparent border-0 p-0 color-picker-custom" />
+                    <input type="text" value={team1Name} onChange={(e) => setTeam1Name(e.target.value)} className="flex-1 bg-gray-900 text-white border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-blue-500" />
+                  </div>
+                </div>
+                <div className="bg-gray-800 p-4 rounded-2xl border border-gray-700">
+                  <label className="block text-gray-400 text-sm mb-2 font-medium">ทีมฝั่งขวา</label>
+                  <div className="flex items-center space-x-3">
+                    <input type="color" value={team2Color} onChange={(e) => setTeam2Color(e.target.value)} className="w-12 h-12 rounded-xl cursor-pointer bg-transparent border-0 p-0 color-picker-custom" />
+                    <input type="text" value={team2Name} onChange={(e) => setTeam2Name(e.target.value)} className="flex-1 bg-gray-900 text-white border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-blue-500" />
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setShowSettings(false)} className="mt-6 w-full py-3 bg-white text-gray-900 font-bold rounded-xl hover:bg-gray-200 transition-colors">ปิดการตั้งค่า</button>
+            </div>
+          )}
+
+          {/* ทีม 1 (ซ้าย) */}
+          <div className="flex-1 flex flex-col justify-center items-center relative transition-colors duration-500 border-b-4 md:border-b-0 md:border-r-4 border-gray-950"
+               style={{ backgroundColor: getBackgroundColor(team1Color, 0.15), boxShadow: `inset 0 0 150px ${getBackgroundColor(team1Color, 0.1)}` }}>
+            <div className="absolute top-0 left-0 right-0 h-32 opacity-30" style={{ background: `linear-gradient(to bottom, ${team1Color}, transparent)` }} />
+            <div className="z-10 flex flex-col items-center w-full px-4 sm:px-8">
+              <input type="text" value={team1Name} onChange={(e) => setTeam1Name(e.target.value)} className="bg-transparent text-center text-3xl sm:text-5xl md:text-6xl font-black text-white/90 uppercase tracking-wider w-full focus:outline-none focus:bg-black/20 rounded-2xl py-2" style={{ textShadow: `0 4px 20px ${getBackgroundColor(team1Color, 0.5)}` }} />
+              <div className="relative group w-full flex justify-center items-center my-4 sm:my-8">
+                <span className="text-[25vh] sm:text-[30vh] md:text-[35vh] lg:text-[45vh] font-black leading-none tabular-nums" style={{ textShadow: `0 10px 40px ${getBackgroundColor(team1Color, 0.8)}` }}>{team1Score}</span>
+              </div>
+              <div className="flex space-x-4 sm:space-x-8 w-full max-w-sm justify-center">
+                <button onClick={() => setTeam1Score(Math.max(0, team1Score - 1))} className="flex-1 flex justify-center items-center py-6 bg-black/30 hover:bg-black/50 text-white rounded-3xl backdrop-blur-sm text-5xl active:scale-95 border border-white/10">-</button>
+                <button onClick={() => setTeam1Score(team1Score + 1)} className="flex-1 flex justify-center items-center py-6 bg-white/10 hover:bg-white/20 text-white rounded-3xl backdrop-blur-sm text-5xl active:scale-95 border border-white/20" style={{ boxShadow: `0 0 30px ${getBackgroundColor(team1Color, 0.3)}` }}>+</button>
+              </div>
+            </div>
+          </div>
+
+          {/* ทีม 2 (ขวา) */}
+          <div className="flex-1 flex flex-col justify-center items-center relative transition-colors duration-500"
+               style={{ backgroundColor: getBackgroundColor(team2Color, 0.15), boxShadow: `inset 0 0 150px ${getBackgroundColor(team2Color, 0.1)}` }}>
+            <div className="absolute top-0 left-0 right-0 h-32 opacity-30" style={{ background: `linear-gradient(to bottom, ${team2Color}, transparent)` }} />
+            <div className="z-10 flex flex-col items-center w-full px-4 sm:px-8">
+              <input type="text" value={team2Name} onChange={(e) => setTeam2Name(e.target.value)} className="bg-transparent text-center text-3xl sm:text-5xl md:text-6xl font-black text-white/90 uppercase tracking-wider w-full focus:outline-none focus:bg-black/20 rounded-2xl py-2" style={{ textShadow: `0 4px 20px ${getBackgroundColor(team2Color, 0.5)}` }} />
+              <div className="relative group w-full flex justify-center items-center my-4 sm:my-8">
+                <span className="text-[25vh] sm:text-[30vh] md:text-[35vh] lg:text-[45vh] font-black leading-none tabular-nums" style={{ textShadow: `0 10px 40px ${getBackgroundColor(team2Color, 0.8)}` }}>{team2Score}</span>
+              </div>
+              <div className="flex space-x-4 sm:space-x-8 w-full max-w-sm justify-center">
+                <button onClick={() => setTeam2Score(Math.max(0, team2Score - 1))} className="flex-1 flex justify-center items-center py-6 bg-black/30 hover:bg-black/50 text-white rounded-3xl backdrop-blur-sm text-5xl active:scale-95 border border-white/10">-</button>
+                <button onClick={() => setTeam2Score(team2Score + 1)} className="flex-1 flex justify-center items-center py-6 bg-white/10 hover:bg-white/20 text-white rounded-3xl backdrop-blur-sm text-5xl active:scale-95 border border-white/20" style={{ boxShadow: `0 0 30px ${getBackgroundColor(team2Color, 0.3)}` }}>+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
