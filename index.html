@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กระดานนับคะแนน (Scoreboard)</title>
+    <style>
+        /* การตั้งค่าพื้นฐาน */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* พื้นหลังสีเข้มเพื่อความโดดเด่น */
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            color: #f1f1f1;
+            letter-spacing: 2px;
+        }
+
+        /* กรอบหลักของกระดานคะแนน */
+        .scoreboard-container {
+            display: flex;
+            gap: 30px;
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* กล่องของแต่ละทีม */
+        .team-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            border-radius: 15px;
+            width: 250px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .team-red { background: linear-gradient(145deg, #a71d31, #df2935); }
+        .team-blue { background: linear-gradient(145deg, #0f4c81, #1a5b92); }
+
+        /* ชื่อทีม (สามารถแก้ไขได้) */
+        .team-name {
+            background: transparent;
+            border: none;
+            border-bottom: 2px dashed rgba(255,255,255,0.3);
+            color: white;
+            font-size: 2rem;
+            text-align: center;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            transition: border 0.3s;
+        }
+
+        .team-name:focus {
+            outline: none;
+            border-bottom: 2px solid white;
+        }
+
+        /* ตัวเลขคะแนน */
+        .score-display {
+            font-size: 8rem;
+            font-weight: bold;
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+        }
+
+        /* ปุ่มกด */
+        .controls {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        button {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 15px 25px;
+            font-size: 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 80px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(2px);
+        }
+
+        /* ปุ่มรีเซ็ต */
+        .btn-reset {
+            margin-top: 40px;
+            background-color: #333;
+            border: 1px solid #555;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            width: auto;
+            border-radius: 50px;
+            letter-spacing: 1px;
+        }
+
+        .btn-reset:hover {
+            background-color: #f39c12;
+            color: #000;
+            border-color: #f39c12;
+        }
+
+        /* การแสดงผลบนหน้าจอมือถือ */
+        @media (max-width: 650px) {
+            .scoreboard-container {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+            .team-box { width: 100%; box-sizing: border-box; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SCOREBOARD</h1>
+    
+    <div class="scoreboard-container">
+        <div class="team-box team-red">
+            <input type="text" class="team-name" value="ทีม A">
+            <div class="score-display" id="scoreA">0</div>
+            <div class="controls">
+                <button onclick="updateScore('A', -1)">-</button>
+                <button onclick="updateScore('A', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="team-box team-blue">
+            <input type="text" class="team-name" value="ทีม B">
+            <div class="score-display" id="scoreB">0</div>
+            <div class="controls">
+                <button onclick="updateScore('B', -1)">-</button>
+                <button onclick="updateScore('B', 1)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-reset" onclick="resetScores()">รีเซ็ตคะแนนใหม่ (Reset)</button>
+
+    <script>
+        // กำหนดค่าเริ่มต้นของคะแนน
+        let currentScoreA = 0;
+        let currentScoreB = 0;
+
+        // ฟังก์ชันอัปเดตคะแนน
+        function updateScore(team, point) {
+            if (team === 'A') {
+                currentScoreA += point;
+                if (currentScoreA < 0) currentScoreA = 0; // ป้องกันคะแนนติดลบ
+                document.getElementById('scoreA').innerText = currentScoreA;
+            } else if (team === 'B') {
+                currentScoreB += point;
+                if (currentScoreB < 0) currentScoreB = 0;
+                document.getElementById('scoreB').innerText = currentScoreB;
+            }
+        }
+
+        // ฟังก์ชันรีเซ็ตคะแนนทั้งหมด
+        function resetScores() {
+            if(confirm("คุณต้องการล้างคะแนนทั้งหมดกลับเป็น 0 ใช่หรือไม่?")) {
+                currentScoreA = 0;
+                currentScoreB = 0;
+                document.getElementById('scoreA').innerText = currentScoreA;
+                document.getElementById('scoreB').innerText = currentScoreB;
+            }
+        }
+    </script>
+
+</body>
+</html>
